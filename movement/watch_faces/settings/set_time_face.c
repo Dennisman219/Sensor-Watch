@@ -134,8 +134,14 @@ bool set_time_face_loop(movement_event_t event, movement_settings_t *settings, v
     if (current_page < 3) {
         watch_set_colon();
         if (settings->bit.clock_mode_24h) {
-            watch_set_indicator(WATCH_INDICATOR_24H);
-            sprintf(buf, "%s  %2d%02d%02d", set_time_face_titles[current_page], date_time.unit.hour, date_time.unit.minute, date_time.unit.second);
+            const char* fmt;
+            if (settings->bit.clock_24h_leading_zero)
+                fmt = "%s  %02d%02d%02d";
+            else {
+                fmt = "%s  %2d%02d%02d";
+                watch_set_indicator(WATCH_INDICATOR_24H);
+            }
+            sprintf(buf, fmt, set_time_face_titles[current_page], date_time.unit.hour, date_time.unit.minute, date_time.unit.second);
         } else {
             sprintf(buf, "%s  %2d%02d%02d", set_time_face_titles[current_page], (date_time.unit.hour % 12) ? (date_time.unit.hour % 12) : 12, date_time.unit.minute, date_time.unit.second);
             if (date_time.unit.hour < 12) watch_clear_indicator(WATCH_INDICATOR_PM);

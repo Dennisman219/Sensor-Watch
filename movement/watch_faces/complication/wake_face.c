@@ -50,19 +50,24 @@ void _wake_face_update_display(movement_settings_t *settings, wake_face_state_t 
     uint8_t hour = state->hour;
 
     watch_clear_display();
-    if ( settings->bit.clock_mode_24h )
-        watch_set_indicator(WATCH_INDICATOR_24H);
-    else {
+    if ( !settings->bit.clock_mode_24h ) {
         if ( hour >= 12 )
             watch_set_indicator(WATCH_INDICATOR_PM);
         hour = hour % 12 ? hour % 12 : 12;
+    } else if ( !settings->bit.clock_24h_leading_zero ) {
+        watch_set_indicator(WATCH_INDICATOR_24H);
     }
 
     if ( state->mode )
         watch_set_indicator(WATCH_INDICATOR_BELL);
 
     static char lcdbuf[11];
-    sprintf(lcdbuf, "WA  %2d%02d  ", hour, state->minute);
+    const char* fmt;
+    if ( settings->bit.clock_mode_24h && settings->bit.clock_24h_leading_zero )
+        fmt = "WA  %02d%02d  ";
+    else
+        fmt = "WA  %2d%02d  ";
+    sprintf(lcdbuf, fmt, hour, state->minute);
 
     watch_set_colon();
     watch_display_string(lcdbuf, 0);

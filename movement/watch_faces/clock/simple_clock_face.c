@@ -51,7 +51,7 @@ void simple_clock_face_activate(movement_settings_t *settings, void *context) {
 
     if (watch_tick_animation_is_running()) watch_stop_tick_animation();
 
-    if (settings->bit.clock_mode_24h) watch_set_indicator(WATCH_INDICATOR_24H);
+    if (settings->bit.clock_mode_24h && !settings->bit.clock_24h_leading_zero) watch_set_indicator(WATCH_INDICATOR_24H);
 
     // handle chime indicator
     if (state->signal_enabled) watch_set_indicator(WATCH_INDICATOR_BELL);
@@ -117,11 +117,20 @@ bool simple_clock_face_loop(movement_event_t event, movement_settings_t *setting
                     if (date_time.unit.hour == 0) date_time.unit.hour = 12;
                 }
                 pos = 0;
+                const char* fmt;
                 if (event.event_type == EVENT_LOW_ENERGY_UPDATE) {
                     if (!watch_tick_animation_is_running()) watch_start_tick_animation(500);
-                    sprintf(buf, "%s%2d%2d%02d  ", watch_utility_get_weekday(date_time), date_time.unit.day, date_time.unit.hour, date_time.unit.minute);
+                    if (settings->bit.clock_mode_24h && settings->bit.clock_24h_leading_zero)
+                        fmt = "%s%2d%02d%02d  ";
+                    else
+                        fmt = "%s%2d%2d%02d  ";
+                    sprintf(buf, fmt, watch_utility_get_weekday(date_time), date_time.unit.day, date_time.unit.hour, date_time.unit.minute);
                 } else {
-                    sprintf(buf, "%s%2d%2d%02d%02d", watch_utility_get_weekday(date_time), date_time.unit.day, date_time.unit.hour, date_time.unit.minute, date_time.unit.second);
+                    if (settings->bit.clock_mode_24h && settings->bit.clock_24h_leading_zero)
+                        fmt = "%s%2d%02d%02d%02d";
+                    else
+                        fmt = "%s%2d%2d%02d%02d";
+                    sprintf(buf, fmt, watch_utility_get_weekday(date_time), date_time.unit.day, date_time.unit.hour, date_time.unit.minute, date_time.unit.second);
                 }
             }
             watch_display_string(buf, pos);

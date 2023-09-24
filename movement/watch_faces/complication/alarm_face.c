@@ -109,7 +109,12 @@ static void _alarm_face_draw(movement_settings_t *settings, alarm_state_t *state
         }
         if (h == 0) h = 12;
     }
-    sprintf(buf, "%c%c%2d%2d%02d  ",
+    const char *fmt;
+    if (settings->bit.clock_mode_24h && settings->bit.clock_24h_leading_zero)
+        fmt = "%c%c%2d%02d%02d  ";
+    else
+        fmt = "%c%c%2d%2d%02d  ";
+    sprintf(buf, fmt,
         _dow_strings[i][0], _dow_strings[i][1],
         (state->alarm_idx + 1),
         h,
