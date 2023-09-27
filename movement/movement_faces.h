@@ -95,6 +95,7 @@
 #include "flashlight_face.h"
 #include "decimal_time_face.h"
 #include "wyoscan_face.h"
+<<<<<<< HEAD
 #include "save_load_face.h"
 #include "day_night_percentage_face.h"
 #include "simple_coin_flip_face.h"
@@ -103,6 +104,9 @@
 #include "minute_repeater_decimal_face.h"
 #include "tuning_tones_face.h"
 #include "kitchen_conversions_face.h"
+=======
+#include "minimal_clock_face.h"
+>>>>>>> 57e9f11 (Minimal clock face)
 // New includes go above this line.
 
 #endif // MOVEMENT_FACES_H_
