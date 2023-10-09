@@ -24,6 +24,7 @@ INCLUDES += \
   -I../lib/vsop87/ \
   -I../lib/astrolib/ \
   -I../lib/morsecalc/ \
+  -I../lib/lua-5.4.6/ \
 
 # If you add any other source files you wish to compile, add them after ../app.c
 # Note that you will need to add a backslash at the end of any line you wish to continue, i.e.
@@ -45,6 +46,37 @@ SRCS += \
   ../lib/morsecalc/calc_fns.c \
   ../lib/morsecalc/calc_strtof.c \
   ../lib/morsecalc/morsecalc_display.c \
+  ../lib/lua-5.4.6/lapi.c \
+  ../lib/lua-5.4.6/lauxlib.c \
+  ../lib/lua-5.4.6/lbaselib.c \
+  ../lib/lua-5.4.6/lcode.c \
+  ../lib/lua-5.4.6/lcorolib.c \
+  ../lib/lua-5.4.6/lctype.c \
+  ../lib/lua-5.4.6/ldblib.c \
+  ../lib/lua-5.4.6/ldebug.c \
+  ../lib/lua-5.4.6/ldo.c \
+  ../lib/lua-5.4.6/ldump.c \
+  ../lib/lua-5.4.6/lfunc.c \
+  ../lib/lua-5.4.6/lgc.c \
+  ../lib/lua-5.4.6/linit.c \
+  ../lib/lua-5.4.6/liolib.c \
+  ../lib/lua-5.4.6/llex.c \
+  ../lib/lua-5.4.6/lmathlib.c \
+  ../lib/lua-5.4.6/lmem.c \
+  ../lib/lua-5.4.6/loadlib.c \
+  ../lib/lua-5.4.6/lobject.c \
+  ../lib/lua-5.4.6/lopcodes.c \
+  ../lib/lua-5.4.6/loslib.c \
+  ../lib/lua-5.4.6/lparser.c \
+  ../lib/lua-5.4.6/lstate.c \
+  ../lib/lua-5.4.6/lstring.c \
+  ../lib/lua-5.4.6/lstrlib.c \
+  ../lib/lua-5.4.6/ltable.c \
+  ../lib/lua-5.4.6/ltm.c \
+  ../lib/lua-5.4.6/lundump.c \
+  ../lib/lua-5.4.6/lutf8lib.c \
+  ../lib/lua-5.4.6/lvm.c \
+  ../lib/lua-5.4.6/lzio.c \
   ../../littlefs/lfs.c \
   ../../littlefs/lfs_util.c \
   ../movement.c \
@@ -119,6 +151,7 @@ SRCS += \
   ../watch_faces/clock/decimal_time_face.c \
   ../watch_faces/clock/wyoscan_face.c \
   ../watch_faces/clock/minimal_clock_face.c \
+  ../watch_faces/complication/lua_face.c \
 # New watch faces go above this line.
 
 # Leave this line at the bottom of the file; it has all the targets for making your project.
