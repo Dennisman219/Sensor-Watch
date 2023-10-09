@@ -31,6 +31,7 @@ const watch_face_t watch_faces[] = {
     minimal_clock_face,
     simple_clock_face,
     alarm_face,
+    timer_face,
     stopwatch_face,
     totp_face,
     set_time_face,
