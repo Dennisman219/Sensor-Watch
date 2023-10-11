@@ -26,13 +26,12 @@
 #include <string.h>
 #include "lua_face.h"
 
-#include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 //#include "lprefix.h"
 
 static int watchprint(lua_State *L) {
-    char* rtrn = lua_tostring(L, -1);
+    char* rtrn = (char *) lua_tostring(L, -1);
     watch_display_string(rtrn, 4);
     return 0;
 }
@@ -50,29 +49,23 @@ void lua_face_setup(movement_settings_t *settings, uint8_t watch_face_index, voi
 
 void lua_face_activate(movement_settings_t *settings, void *context) {
     (void) settings;
-    //lua_state_t *state = (lua_state_t *)context;
-    (void) context;
+    lua_state_t *state = (lua_state_t *) context;
 
     // Handle any tasks related to your watch face coming on screen.
-    char buf[16];
-    sprintf(buf, "LU");
-    watch_display_string(buf, 0);
+    watch_display_string("WT", 0);
 
-    lua_State *L = luaL_newstate();
-    lua_register(L, "watchprint", watchprint);
-    luaL_openlibs(L);
+    state->ran = 0;
 
-    (void) luaL_dostring(L, "watchprint(\"lua\")");
+    state->L = luaL_newstate();
+    lua_register(state->L, "watchprint", watchprint);
+    luaL_openlibs(state->L);
 
-    lua_close(L);
-
-    sprintf(buf, "OK");
-    watch_display_string(buf, 0);
+    //sprintf(buf, "LU");
+    watch_display_string("LU", 0);
 }
 
 bool lua_face_loop(movement_event_t event, movement_settings_t *settings, void *context) {
-    //lua_state_t *state = (lua_state_t *)context;
-    (void) context;
+    lua_state_t *state = (lua_state_t *) context;
 
     switch (event.event_type) {
         case EVENT_ACTIVATE:
@@ -88,6 +81,17 @@ bool lua_face_loop(movement_event_t event, movement_settings_t *settings, void *
             break;
         case EVENT_ALARM_BUTTON_UP:
             // Just in case you have need for another button.
+            if (state->ran == 0) {
+                state->ran = 1;
+                int jeoe = luaL_dostring(state->L, "watchprint(\"lua\")");
+
+                if (jeoe == 0) { // no errors
+                    watch_display_string("OK", 0);
+                } else {
+                    watch_display_string("ER", 0);
+                }
+            }
+
             break;
         case EVENT_TIMEOUT:
             // Your watch face will receive this event after a period of inactivity. If it makes sense to resign,
@@ -120,9 +124,9 @@ bool lua_face_loop(movement_event_t event, movement_settings_t *settings, void *
 
 void lua_face_resign(movement_settings_t *settings, void *context) {
     (void) settings;
-    (void) context;
+    lua_state_t *state = (lua_state_t *) context;
 
     // handle any cleanup before your watch face goes off-screen.
+    lua_close(state->L);
+    state->ran = 0;
 }
-
-void _open(int arg);

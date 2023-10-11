@@ -26,6 +26,7 @@
 #define LUA_FACE_H_
 
 #include "movement.h"
+#include "lua.h"
 
 /*
  * A DESCRIPTION OF YOUR WATCH FACE
@@ -36,7 +37,8 @@
 
 typedef struct {
     // Anything you need to keep track of, put it here!
-    uint8_t unused;
+    lua_State *L;
+    int ran;
 } lua_state_t;
 
 void lua_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);
