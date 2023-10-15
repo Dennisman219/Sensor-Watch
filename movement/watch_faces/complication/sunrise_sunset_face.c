@@ -85,7 +85,7 @@ static void _sunrise_sunset_face_update(movement_settings_t *settings, sunrise_s
         }
 
         watch_set_colon();
-        if (settings->bit.clock_mode_24h) watch_set_indicator(WATCH_INDICATOR_24H);
+        if (settings->bit.clock_mode_24h && !settings->bit.clock_24h_leading_zero) watch_set_indicator(WATCH_INDICATOR_24H);
 
         rise += hours_from_utc;
         set += hours_from_utc;
@@ -109,7 +109,12 @@ static void _sunrise_sunset_face_update(movement_settings_t *settings, sunrise_s
                     if (watch_utility_convert_to_12_hour(&scratch_time)) watch_set_indicator(WATCH_INDICATOR_PM);
                     else watch_clear_indicator(WATCH_INDICATOR_PM);
                 }
-                sprintf(buf, "rI%2d%2d%02d  ", scratch_time.unit.day, scratch_time.unit.hour, scratch_time.unit.minute);
+                const char* fmt;
+                if (settings->bit.clock_mode_24h && settings->bit.clock_24h_leading_zero)
+                    fmt = "rI%2d%02d%02d  ";
+                else
+                    fmt = "rI%2d%2d%02d  ";
+                sprintf(buf, fmt, scratch_time.unit.day, scratch_time.unit.hour, scratch_time.unit.minute);
                 watch_display_string(buf, 0);
                 return;
             } else {
@@ -136,7 +141,13 @@ static void _sunrise_sunset_face_update(movement_settings_t *settings, sunrise_s
                     if (watch_utility_convert_to_12_hour(&scratch_time)) watch_set_indicator(WATCH_INDICATOR_PM);
                     else watch_clear_indicator(WATCH_INDICATOR_PM);
                 }
-                sprintf(buf, "SE%2d%2d%02d  ", scratch_time.unit.day, scratch_time.unit.hour, scratch_time.unit.minute);
+                const char* fmt;
+                if (settings->bit.clock_mode_24h && settings->bit.clock_24h_leading_zero) {
+                    fmt = "SE%2d%02d%02d  ";
+                } else {
+                    fmt = "SE%2d%2d%02d  ";
+                }
+                sprintf(buf, fmt, scratch_time.unit.day, scratch_time.unit.hour, scratch_time.unit.minute);
                 watch_display_string(buf, 0);
                 return;
             } else {
