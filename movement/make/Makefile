@@ -152,6 +152,7 @@ SRCS += \
   ../watch_faces/clock/wyoscan_face.c \
   ../watch_faces/clock/minimal_clock_face.c \
   ../watch_faces/complication/lua_face.c \
+  ../watch_faces/complication/quadratic_formula_face.c \
 # New watch faces go above this line.
 
 # Leave this line at the bottom of the file; it has all the targets for making your project.
