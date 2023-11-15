@@ -96,6 +96,7 @@
 #include "decimal_time_face.h"
 #include "wyoscan_face.h"
 #include "minimal_clock_face.h"
+#include "quadratic_formula_face.h"
 // New includes go above this line.
 
 #endif // MOVEMENT_FACES_H_
