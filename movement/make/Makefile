@@ -77,6 +77,7 @@ SRCS += \
   ../lib/lua-5.4.6/lutf8lib.c \
   ../lib/lua-5.4.6/lvm.c \
   ../lib/lua-5.4.6/lzio.c \
+  ../lib/lua-5.4.6/lsensorwatchlib.c \
   ../../littlefs/lfs.c \
   ../../littlefs/lfs_util.c \
   ../movement.c \

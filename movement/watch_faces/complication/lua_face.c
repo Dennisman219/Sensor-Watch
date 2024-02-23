@@ -30,11 +30,7 @@
 #include "lauxlib.h"
 //#include "lprefix.h"
 
-static int watchprint(lua_State *L) {
-    char* rtrn = (char *) lua_tostring(L, -1);
-    watch_display_string(rtrn, 4);
-    return 0;
-}
+#include "script.h"
 
 void lua_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr) {
     (void) settings;
@@ -57,10 +53,14 @@ void lua_face_activate(movement_settings_t *settings, void *context) {
     state->ran = 0;
 
     state->L = luaL_newstate();
-    lua_register(state->L, "watchprint", watchprint);
-    luaL_openlibs(state->L);
+    luaL_requiref(state->L, LUA_GNAME, luaopen_base, 1);
+    luaL_requiref(state->L, LUA_LOADLIBNAME, luaopen_package, 1);
+    //luaL_requiref(state->L, LUA_COLIBNAME, luaopen_coroutine, 1);
+    //luaL_requiref(state->L, LUA_STRLIBNAME, luaopen_string, 1);
+    //luaL_requiref(state->L, LUA_MATHLIBNAME, luaopen_math, 1);
+    //luaL_requiref(state->L, LUA_UTF8LIBNAME, luaopen_utf8, 1);
+    luaL_requiref(state->L, LUA_SENSORWATCHLIBNAME, luaopen_sensorwatch, 1);
 
-    //sprintf(buf, "LU");
     watch_display_string("LU", 0);
 }
 
@@ -83,12 +83,16 @@ bool lua_face_loop(movement_event_t event, movement_settings_t *settings, void *
             // Just in case you have need for another button.
             if (state->ran == 0) {
                 state->ran = 1;
-                int jeoe = luaL_dostring(state->L, "watchprint(\"lua\")");
+                int ret = luaL_dostring(state->L, (char*) script);
 
-                if (jeoe == 0) { // no errors
-                    watch_display_string("OK", 0);
-                } else {
+                if (ret != LUA_OK) {
                     watch_display_string("ER", 0);
+#ifdef __EMSCRIPTEN__
+                    printf("Error: %s\n", lua_tostring(state->L, -1));
+                    lua_pop(state->L, 1); // pop error message
+#endif
+                } else {
+                    watch_display_string("OK", 0);
                 }
             }
 
