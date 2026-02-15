@@ -38,7 +38,7 @@
 typedef struct {
     // Anything you need to keep track of, put it here!
     lua_State *L;
-    int ran;
+    bool load_ok;
 } lua_state_t;
 
 void lua_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);

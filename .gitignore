@@ -25,3 +25,4 @@ _autosave*
 fp-info-cache
 .~*
 *.plan
+movement/lib/lua-5.4.6/lua_file.h

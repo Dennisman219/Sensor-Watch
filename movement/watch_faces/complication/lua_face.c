@@ -30,7 +30,7 @@
 #include "lauxlib.h"
 //#include "lprefix.h"
 
-#include "script.h"
+#include "lua_file.h"
 
 void lua_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr) {
     (void) settings;
@@ -48,13 +48,10 @@ void lua_face_activate(movement_settings_t *settings, void *context) {
     lua_state_t *state = (lua_state_t *) context;
 
     // Handle any tasks related to your watch face coming on screen.
-    watch_display_string("WT", 0);
-
-    state->ran = 0;
-
+    state->load_ok = false;
     state->L = luaL_newstate();
     luaL_requiref(state->L, LUA_GNAME, luaopen_base, 1);
-    luaL_requiref(state->L, LUA_LOADLIBNAME, luaopen_package, 1);
+    //luaL_requiref(state->L, LUA_LOADLIBNAME, luaopen_package, 1);
     //luaL_requiref(state->L, LUA_COLIBNAME, luaopen_coroutine, 1);
     //luaL_requiref(state->L, LUA_STRLIBNAME, luaopen_string, 1);
     //luaL_requiref(state->L, LUA_MATHLIBNAME, luaopen_math, 1);
@@ -62,67 +59,61 @@ void lua_face_activate(movement_settings_t *settings, void *context) {
     luaL_requiref(state->L, LUA_SENSORWATCHLIBNAME, luaopen_sensorwatch, 1);
 
     watch_display_string("LU", 0);
+
+    int ret = luaL_dostring(state->L, (char*) lua_file);
+    if (ret != LUA_OK) {
+        watch_display_string("ER", 0);
+#ifdef __EMSCRIPTEN__
+        printf("Error: %s\n", lua_tostring(state->L, -1));
+        lua_pop(state->L, 1); // pop error message
+#endif
+    } else {
+        state->load_ok = true;
+        watch_display_string("OK", 0);
+    }
 }
 
 bool lua_face_loop(movement_event_t event, movement_settings_t *settings, void *context) {
     lua_state_t *state = (lua_state_t *) context;
 
+    const char *lua_event;
     switch (event.event_type) {
         case EVENT_ACTIVATE:
-            // Show your initial UI here.
+            lua_event = "activate";
             break;
         case EVENT_TICK:
-            // If needed, update your display here.
+            lua_event = "tick";
             break;
         case EVENT_LIGHT_BUTTON_UP:
-            // You can use the Light button for your own purposes. Note that by default, Movement will also
-            // illuminate the LED in response to EVENT_LIGHT_BUTTON_DOWN; to suppress that behavior, add an
-            // empty case for EVENT_LIGHT_BUTTON_DOWN.
+            lua_event = "light-button-up";
             break;
         case EVENT_ALARM_BUTTON_UP:
-            // Just in case you have need for another button.
-            if (state->ran == 0) {
-                state->ran = 1;
-                int ret = luaL_dostring(state->L, (char*) script);
-
-                if (ret != LUA_OK) {
-                    watch_display_string("ER", 0);
-#ifdef __EMSCRIPTEN__
-                    printf("Error: %s\n", lua_tostring(state->L, -1));
-                    lua_pop(state->L, 1); // pop error message
-#endif
-                } else {
-                    watch_display_string("OK", 0);
-                }
-            }
-
+            lua_event = "alarm-button-up";
             break;
         case EVENT_TIMEOUT:
-            // Your watch face will receive this event after a period of inactivity. If it makes sense to resign,
-            // you may uncomment this line to move back to the first watch face in the list:
-            // movement_move_to_face(0);
+            lua_event = "timeout";
             break;
         case EVENT_LOW_ENERGY_UPDATE:
-            // If you did not resign in EVENT_TIMEOUT, you can use this event to update the display once a minute.
-            // Avoid displaying fast-updating values like seconds, since the display won't update again for 60 seconds.
-            // You should also consider starting the tick animation, to show the wearer that this is sleep mode:
-            // watch_start_tick_animation(500);
+            lua_event = "low-energy-update";
             break;
         default:
-            // Movement's default loop handler will step in for any cases you don't handle above:
-            // * EVENT_LIGHT_BUTTON_DOWN lights the LED
-            // * EVENT_MODE_BUTTON_UP moves to the next watch face in the list
-            // * EVENT_MODE_LONG_PRESS returns to the first watch face (or skips to the secondary watch face, if configured)
-            // You can override any of these behaviors by adding a case for these events to this switch statement.
             return movement_default_loop_handler(event, settings);
+            break;
+    }
+    
+    if (state->load_ok) {
+        lua_getglobal(state->L, "sw_loop");
+        lua_pushstring(state->L, lua_event);
+        int result = lua_pcall(state->L, 1, 0, 0);
+        if (result != 0) {
+            watch_display_string("ER", 0);
+#ifdef __EMSCRIPTEN__
+            printf("Error: %s\n", lua_tostring(state->L, -1));
+            lua_pop(state->L, 1); // pop error message
+#endif
+        }
     }
 
-    // return true if the watch can enter standby mode. Generally speaking, you should always return true.
-    // Exceptions:
-    //  * If you are displaying a color using the low-level watch_set_led_color function, you should return false.
-    //  * If you are sounding the buzzer using the low-level watch_set_buzzer_on function, you should return false.
-    // Note that if you are driving the LED or buzzer using Movement functions like movement_illuminate_led or
-    // movement_play_alarm, you can still return true. This guidance only applies to the low-level watch_ functions.
     return true;
 }
 
@@ -132,5 +123,4 @@ void lua_face_resign(movement_settings_t *settings, void *context) {
 
     // handle any cleanup before your watch face goes off-screen.
     lua_close(state->L);
-    state->ran = 0;
 }
